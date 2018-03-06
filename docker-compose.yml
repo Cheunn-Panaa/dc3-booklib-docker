@@ -1,0 +1,35 @@
+version: '2'
+services:
+    db:
+        image: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: booklib
+            MYSQL_USER: root
+            MYSQL_PASSWORD: root
+    php:
+        build: .docker/php7-fpm
+        volumes:
+            - ./:/var/www/symfony:cached
+            - ./logs/symfony:/var/www/symfony/var/logs:cached
+        links:
+            - db
+    nginx:
+        build: .docker/nginx
+        ports:
+            - "80:80"
+        links:
+            - php
+        volumes_from:
+            - php
+        volumes:
+            - ./logs/nginx/:/var/log/nginx:cached
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        environment:
+            PMA_HOST: db
+            PMA_PORT: 3306
+        ports:
+            - "8080:80"
+        links:
+            - db
